@@ -17,12 +17,14 @@ import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.rememberNotification
 import cn.hutool.core.date.DateTime
 import cn.hutool.core.date.DateUtil
+import cn.hutool.core.io.FileUtil
 import com.enhe.helper.model.FileNode
 import com.enhe.helper.service.BugService
 import com.enhe.helper.service.ExcelTempService
 import com.enhe.helper.service.FileService
 import kotlinx.coroutines.launch
 import java.io.File
+import java.nio.charset.Charset
 
 // 默认窗口尺寸
 val WINDOW_HEIGHT = 800.dp
@@ -106,13 +108,20 @@ fun App(trayState: TrayState) {
 
 suspend fun export(file: File, trayState: TrayState, info: Notification, error: Notification) {
     try {
-        ExcelTempService.javaClass.classLoader.getResource(ExcelTempService.BUGS_TEMP)?.path?.let {
+        ExcelTempService.javaClass.classLoader.getResourceAsStream(ExcelTempService.BUGS_TEMP)?.let {
             // 填充
-            ExcelTempService.fill(it, "${file.parent}${File.separator}bugs-${DateUtil.format(DateTime(), "yyMMddHHmmss")}.xlsx", BugService.getData(file))
+            ExcelTempService.fill(it,
+                "${file.parent}${File.separator}bugs-${DateUtil.format(DateTime(), "yyMMddHHmmss")}.xlsx",
+                BugService.getData(file))
         }
         // 发送通知
         trayState.sendNotification(info)
     } catch (e: Exception) {
+        mutableListOf("", "----", "", e.message)
+            .also { it.addAll(e.stackTrace.map { s -> s.toString() }.toList()) }
+            .run {
+                FileUtil.appendLines(this, "${file.parent}${File.separator}logs${File.separator}error.log", Charset.defaultCharset())
+            }
         trayState.sendNotification(error)
     }
 }

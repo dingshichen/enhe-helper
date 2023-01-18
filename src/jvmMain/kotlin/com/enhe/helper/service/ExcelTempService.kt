@@ -5,16 +5,20 @@
 package com.enhe.helper.service
 
 import com.alibaba.excel.EasyExcel
+import com.alibaba.excel.support.ExcelTypeEnum
+import java.io.File
+import java.io.InputStream
 
 /**
  * Excel 模版处理
  */
 object ExcelTempService {
 
-    const val BUGS_TEMP = "temp/bugs-temp.xlsx"
+    val BUGS_TEMP = "temp${File.separator}bugs-temp.xlsx"
 
-    suspend fun fill(temp: String, out: String, data: List<Any>) {
+    suspend fun fill(temp: InputStream, out: String, data: List<Any>) {
         EasyExcel.write(out)
+            .excelType(ExcelTypeEnum.XLSX)
             .withTemplate(temp)
             .sheet(1)
             .doFill(data)

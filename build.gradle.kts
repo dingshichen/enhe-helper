@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.enhe"
-version = "1.0"
+version = "1.0.0"
 
 repositories {
     google()
@@ -38,6 +38,7 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
+            includeAllModules = true
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "helper"
             packageVersion = "1.0.0"
